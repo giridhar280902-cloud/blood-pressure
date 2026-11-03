@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f8f6">
+    <meta name="description" content="Enter your blood pressure reading to see a simple visual guide to its range.">
+    <title>Pressure Point — Blood pressure checker</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+  </head>
+  <body>
+    <main class="page">
+      <a class="brand" th:href="@{/}" aria-label="Pressure Point home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 12h4l2.1-5.5L13 18l2.2-6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        Pressure Point
+      </a>
+
+      <header class="hero">
+        <p class="eyebrow">A quick reading guide</p>
+        <h1>Know your numbers.</h1>
+        <p class="hero-copy">Enter your blood pressure to see where your reading sits on a simple visual range.</p>
+      </header>
+
+      <section class="layout" aria-label="Blood pressure checker">
+        <form class="card input-card" method="post" th:action="@{/}">
+          <h2>Your reading</h2>
+          <p class="card-intro">Enter the two numbers from your monitor.</p>
+
+          <div class="field">
+            <label for="systolic">Systolic pressure <span>(top number)</span></label>
+            <div class="input-wrap">
+              <input id="systolic" name="systolic" type="number" inputmode="numeric" min="40" max="300" step="1" placeholder="e.g. 118" required aria-describedby="systolic-hint systolic-error" th:value="${systolicInput}" th:attr="aria-invalid=${errors != null and errors.containsKey('systolic')}">
+              <span class="unit">mmHg</span>
+            </div>
+            <p class="hint" id="systolic-hint">Usually the larger number.</p>
+            <p class="error" id="systolic-error" th:if="${errors != null and errors.containsKey('systolic')}" th:text="${errors['systolic']}"></p>
+          </div>
+
+          <div class="field">
+            <label for="diastolic">Diastolic pressure <span>(bottom number)</span></label>
+            <div class="input-wrap">
+              <input id="diastolic" name="diastolic" type="number" inputmode="numeric" min="20" max="200" step="1" placeholder="e.g. 76" required aria-describedby="diastolic-hint diastolic-error" th:value="${diastolicInput}" th:attr="aria-invalid=${errors != null and errors.containsKey('diastolic')}">
+              <span class="unit">mmHg</span>
+            </div>
+            <p class="hint" id="diastolic-hint">Usually the smaller number.</p>
+            <p class="error" id="diastolic-error" th:if="${errors != null and errors.containsKey('diastolic')}" th:text="${errors['diastolic']}"></p>
+          </div>
+
+          <button class="submit" type="submit">Check my reading</button>
+          <p class="privacy-note">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3 5 6v5c0 4.7 3 8.2 7 10 4-1.8 7-5.3 7-10V6l-7-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Your numbers are only used to calculate this result and are not saved.
+          </p>
+        </form>
+
+        <section class="card result-card" aria-labelledby="result-title">
+          <div class="result-heading">
+            <h2 id="result-title">Your result</h2>
+            <span class="status" th:classappend="${statusClass}" th:if="${result != null}" th:text="${result.overallCategory().label()}">Waiting for reading</span>
+            <span class="status" th:unless="${result != null}">Waiting for reading</span>
+          </div>
+
+          <div class="empty-reading" th:if="${result == null}">
+            <strong>Your visual guide will appear here.</strong>
+            Add both numbers to see how they compare with typical adult ranges.
+          </div>
+
+          <div th:if="${result != null}">
+            <div class="reading-values">
+              <strong><span th:text="${result.systolic()}">118</span>/<span th:text="${result.diastolic()}">76</span></strong>
+              <span>mmHg</span>
+            </div>
+
+            <div class="range-row">
+              <div class="range-label">
+                <strong>Systolic <span>(top)</span></strong>
+                <span th:text="${result.systolicCategory().label()}">Normal</span>
+              </div>
+              <div class="bar systolic-range" role="img" th:attr="aria-label=${result.systolicCategory().label() + ' systolic pressure, ' + result.systolic() + ' mmHg'}">
+                <span class="bar-low"></span>
+                <span class="bar-normal"></span>
+                <span class="bar-elevated"></span>
+                <span class="bar-high"></span>
+                <span class="marker" th:style="|left: ${systolicPosition}%;|"></span>
+              </div>
+              <div class="scale systolic-scale" aria-hidden="true">
+                <span class="start">60</span><span style="left: 21.43%">90</span><span style="left: 42.86%">120</span><span style="left: 50%">130</span><span class="end">200+</span>
+              </div>
+            </div>
+
+            <div class="range-row">
+              <div class="range-label">
+                <strong>Diastolic <span>(bottom)</span></strong>
+                <span th:text="${result.diastolicCategory().label()}">Normal</span>
+              </div>
+              <div class="bar diastolic-range" role="img" th:attr="aria-label=${result.diastolicCategory().label() + ' diastolic pressure, ' + result.diastolic() + ' mmHg'}">
+                <span class="bar-low"></span>
+                <span class="bar-normal"></span>
+                <span class="bar-elevated"></span>
+                <span class="bar-high"></span>
+                <span class="marker" th:style="|left: ${diastolicPosition}%;|"></span>
+              </div>
+              <div class="scale diastolic-scale" aria-hidden="true">
+                <span class="start">40</span><span style="left: 25%">60</span><span style="left: 50%">80</span><span class="end">120+</span>
+              </div>
+            </div>
+
+            <div class="legend" aria-label="Range bar key">
+              <span class="legend-item"><span class="legend-dot low"></span>Low</span>
+              <span class="legend-item"><span class="legend-dot normal"></span>Normal</span>
+              <span class="legend-item"><span class="legend-dot elevated"></span>Elevated</span>
+              <span class="legend-item"><span class="legend-dot high"></span>High</span>
+            </div>
+
+            <p class="result-message" th:classappend="${result.urgent()} ? ' urgent' : ''" th:text="${result.message()}"></p>
+          </div>
+        </section>
+      </section>
+
+      <p class="disclaimer">This tool is for general information only, not a diagnosis. Blood pressure can vary; follow your healthcare professional’s advice and consider your individual circumstances.</p>
+      <footer>Take a moment. Sit quietly before measuring for a more reliable reading.</footer>
+    </main>
+  </body>
+</html>
