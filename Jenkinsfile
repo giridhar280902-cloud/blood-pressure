@@ -37,7 +37,7 @@ pipeline {
         stage('mvn test'){
             steps {
                 sh 'mvn --version'
-                sh 'mvn --batch-mode clean test'
+                sh 'mvn --batch-mode clean package'
             }
         post {
             always {
@@ -45,5 +45,10 @@ pipeline {
             }
         }
         }
+        stage('Build Docker image') {
+            steps {
+                sh 'docker build -f Dockerfile -t "blood-pressure:${BUILD_NUMBER}" .'
+    }
+}
     } // Close stages
 } // Close pipeline
