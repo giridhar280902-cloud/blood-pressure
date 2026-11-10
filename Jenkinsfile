@@ -47,7 +47,7 @@ pipeline {
         }
         stage('Build Docker image') {
             steps {
-                sh 'docker build -f Dockerfile -t "blood-pressure:${blood-pressure:14}" .'
+                sh 'docker build -f Dockerfile -t "blood-pressure:14" .'
     }
 }
         stage('Push Docker image') {
